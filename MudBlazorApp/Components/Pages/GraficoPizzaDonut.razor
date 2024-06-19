@@ -1,0 +1,71 @@
+﻿@page "/grafico-pizza-donut"
+
+@if (data != null && data.Length > 0)
+{
+   <div style="display: flex; gap: 16px;">
+        <MudPaper Class="pa-4" Style="width:500px">
+            <MudText Typo="Typo.h5" Style="text-align: center">Funcionários por Departamento</MudText>
+            <MudChart ChartType="ChartType.Pie"
+                      InputData="@data"
+                      InputLabels="@nomes"
+                      Width="100%"
+                      Height="400px">
+                
+            </MudChart>
+            <div class="legend">
+                @for (int i = 0; i < data.Length; i++)
+                {
+                    <div>@nomes[i]: @data[i]</div>
+                }
+            </div>
+        </MudPaper>
+        <MudPaper Class="pa-4" Style="width:500px">
+            <MudText Typo="Typo.h5" Style="text-align: center">Funcionários por Departamento</MudText>
+            <MudChart ChartType="ChartType.Donut"
+                      InputData="@data"
+                      InputLabels="@nomes"
+                      Width="100%"
+                      Height="400px">
+                <CustomGraphics>
+                    <text class="donut-inner-text" x="50%" y="35%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="2">Total Funcionários</text>
+                    <text class="donut-inner-text" x="47%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="5">@data.Sum().ToString()</text>
+                </CustomGraphics>
+            </MudChart>
+            <div class="legend">
+                @for (int i = 0; i < data.Length; i++)
+                {
+                    <div>@nomes[i]: @data[i]</div>
+                }
+            </div>
+        </MudPaper>
+    </div>
+}
+else
+{
+    <MudText Typo="Typo.h6">Carregando dados...</MudText>
+}
+
+@code {
+    private int Index = -1;
+    private double[] data = Array.Empty<double>();
+    private string[] nomes = Array.Empty<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GerarDadosGraficoPizza();
+    }
+
+    async Task GerarDadosGraficoPizza()
+    {
+        var funcionariosPorDepartamento = await DataService.GetFuncionariosPorDepartamentoAsync();
+
+        if (funcionariosPorDepartamento != null && funcionariosPorDepartamento.Count > 0)
+        {
+            var nomesDepartamentos = funcionariosPorDepartamento.Keys.ToArray();
+            var numeroFuncionarios = funcionariosPorDepartamento.Values.ToArray();
+
+            nomes = nomesDepartamentos;
+            data = Array.ConvertAll(numeroFuncionarios, item => (double)item);
+        }
+    }
+}
